@@ -1,0 +1,28 @@
+use super::Expr;
+
+whitespace = #quiet<[ \t]*>
+
+_ = whitespace?
+
+pub statements -> Vec<Expr> 
+= s:statement* _ { s }
+
+statement -> Expr 
+= _ e:expression _ ";" { e }
+
+expression -> Expr 
+= "int" _ i:identifier _ "=" _ e:literal {
+    Expr::Assign(i, Box::new(e))
+}
+
+identifier -> String 
+= #quiet<n:$([a-zA-Z][a-zA-Z0-9_]*) {
+    n.to_owned()
+}> 
+/ #expected("identifier")
+
+literal -> Expr
+= #quiet<n:$([0-9]+) { 
+    Expr::Literal(n.to_owned()) 
+}> 
+/ #expected("literal")
